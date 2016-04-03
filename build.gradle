@@ -14,13 +14,13 @@ apply plugin: 'com.android.application'
 
 
 dependencies {
-    compile files('lib/ioioirobot.jar')
     compile project(':ioiolibaccessory')
     compile project(':ioiolibandroid')
+    compile files('lib/ioioirobot.jar')
 }
 
 android {
-    compileSdkVersion 'Google Inc.:Google APIs:23'
+    compileSdkVersion 'Google Inc.:Google APIs:22'
     buildToolsVersion '23.0.2'
 
     sourceSets {

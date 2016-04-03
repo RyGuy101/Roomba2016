@@ -8,12 +8,13 @@ package org.jointheleague.iaroc;
  * version 150613A Erik lessons
  **************************************************************************/
 
+import android.os.SystemClock;
+
 import ioio.lib.api.IOIO;
 import ioio.lib.api.exception.ConnectionLostException;
 
 import org.jointheleague.erik.irobot.IRobotCreateAdapter;
 import org.jointheleague.erik.irobot.IRobotCreateInterface;
-import org.jointheleague.iaroc.Dashboard;
 import org.jointheleague.iaroc.sensors.UltraSonicSensors;
 
 import java.util.Random;
@@ -62,7 +63,7 @@ public class Brain extends IRobotCreateAdapter {
         rightFrontSignal = getCliffFrontRightSignal();
         leftSignal = getCliffLeftSignal();
         rightSignal = getCliffRightSignal();
-        dashboard.log(leftFrontSignal + "");//for testing only to calibrate threshhold
+//        dashboard.log(leftFrontSignal + "");//for testing only to calibrate threshhold
 
         /***************************************************************************************
          * Handling left IR sensors.
@@ -131,6 +132,7 @@ public class Brain extends IRobotCreateAdapter {
             relativeHeading = 0;
             while (relativeHeading < angleToTurn) {
                 readSensors(SENSORS_GROUP_ID6);
+                SystemClock.sleep(10000 / wheelSpeed);
                 relativeHeading += getAngle();
             }
         }
@@ -140,6 +142,7 @@ public class Brain extends IRobotCreateAdapter {
             relativeHeading = 0;
             while (relativeHeading > angleToTurn) {
                 readSensors(SENSORS_GROUP_ID6);
+                SystemClock.sleep(10000 / wheelSpeed);
                 relativeHeading += getAngle();
             }
         }
