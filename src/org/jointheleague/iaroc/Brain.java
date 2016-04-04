@@ -36,9 +36,9 @@ public class Brain extends IRobotCreateAdapter {
     private int rightSignal;
     private int leftFrontSignal;
     private int rightFrontSignal;
-    private int wheelSpeed = 50;
+    private int wheelSpeed = 350;
     private int relativeHeading = 0;
-    private int irSensorThreshhold = 2000;
+    private int irSensorThreshhold = 300;
     public int turnSpan;
     private int[] beep1 = {72, 15};
     private int[] beep2 = {80, 15};
@@ -57,70 +57,64 @@ public class Brain extends IRobotCreateAdapter {
     }
 
     public void loop() throws ConnectionLostException {
-        driveDirect(wheelSpeed, wheelSpeed);
         readSensors(SENSORS_GROUP_ID6); // Reads all sensors
         leftFrontSignal = getCliffFrontLeftSignal();
         rightFrontSignal = getCliffFrontRightSignal();
         leftSignal = getCliffLeftSignal();
         rightSignal = getCliffRightSignal();
+        dashboard.log(String.valueOf(leftFrontSignal));
 //        dashboard.log(leftFrontSignal + "");//for testing only to calibrate threshhold
 
         /***************************************************************************************
-         * Handling left IR sensors.
+         * Handling IR sensors.
          ***************************************************************************************/
-        if (leftFrontSignal > irSensorThreshhold) // Seeing left front IR
-        // sensor. Too far right.
-        {
-            song(1, beep1);
-            playSong(1);
-            turnAngle(5); // Turn left 5 degrees.
-        }
-        if (leftSignal > irSensorThreshhold) // Seeing left front IR sensor. Too
-        // far right.
-        {
-            song(2, beep2);
-            playSong(2);
-            turnAngle(20); // Turn left 20 degrees.
-        }
-
-        /***************************************************************************************
-         * Handling right IR sensors.
-         ***************************************************************************************/
-        if (rightFrontSignal > irSensorThreshhold) // Seeing right front IR
-        // sensor. Too far left.
-        {
-            song(3, beep3);
-            playSong(3);
-            turnAngle(-5);// Turn right 5 degrees.
-        }
-        if (rightSignal > irSensorThreshhold) // Seeing right front IR sensor.
-        // Too far left...turn right.
-        {
-            song(1, beep1);
-            playSong(1);
-            turnAngle(-20); // Turn right 20 degrees.
-        }
-
         /***************************************************************************************
          * Checking for bumps. Turns right on left bump. Turns left on
          * right bump. Back up and turn right for head-on.
          ***************************************************************************************/
         boolean bumpRightSignal = isBumpRight();
         boolean bumpLeftSignal = isBumpLeft();
-
-        if (bumpRightSignal) {
+        if (leftFrontSignal > irSensorThreshhold && rightFrontSignal <= irSensorThreshhold) // Seeing left front IR
+        // sensor. Too far right.
+        {
             song(1, beep1);
             playSong(1);
-            driveDirect(wheelSpeed, 0);// turn left
-        }
-
-        if (bumpLeftSignal && bumpRightSignal) // Front bump.
+            driveDirect(wheelSpeed, wheelSpeed / 6); // turn left
+//        } else if (leftSignal > irSensorThreshhold && rightSignal <= irSensorThreshhold) // Seeing left front IR sensor. Too
+//        // far right.
+//        {
+//            song(2, beep2);
+//            playSong(2);
+//            driveDirect(wheelSpeed, -wheelSpeed); // spin left
+        } else if (rightFrontSignal > irSensorThreshhold && leftFrontSignal <= irSensorThreshhold) // Seeing right front IR
+        // sensor. Too far left.
+        {
+            song(3, beep3);
+            playSong(3);
+            driveDirect(wheelSpeed / 6, wheelSpeed); // turn right
+//        } else if (rightSignal > irSensorThreshhold && leftSignal <= irSensorThreshhold) // Seeing right front IR sensor.
+//        // Too far left...turn right.
+//        {
+//            song(1, beep1);
+//            playSong(1);
+//            driveDirect(0, wheelSpeed); // spin right
+        } else if (bumpLeftSignal && bumpRightSignal) // Front bump.
         {
             song(1, beep1);
             playSong(1);
             driveDirect(-wheelSpeed, -wheelSpeed / 2); // Back up.
             turnAngle(-30); // Turn right 30 degrees.
             driveDirect(wheelSpeed, wheelSpeed); // Continue forward.
+        } else if (bumpRightSignal) {
+            song(1, beep1);
+            playSong(1);
+            driveDirect(wheelSpeed, 0);// turn left
+        } else if (bumpLeftSignal) {
+            song(1, beep1);
+            playSong(1);
+            driveDirect(0, wheelSpeed);// turn right
+        } else {
+            driveDirect(wheelSpeed, wheelSpeed);
         }
 
     }
