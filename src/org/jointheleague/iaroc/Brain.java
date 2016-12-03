@@ -8,6 +8,11 @@ package org.jointheleague.iaroc;
  * version 150613A Erik lessons
  **************************************************************************/
 
+/*
+ * Modified on 4/3/16 by Ryan Nemiroff for San Diego Library event
+ * Refactored on 12/2/16
+ */
+
 import android.os.SystemClock;
 
 import ioio.lib.api.IOIO;
@@ -17,20 +22,10 @@ import org.jointheleague.erik.irobot.IRobotCreateAdapter;
 import org.jointheleague.erik.irobot.IRobotCreateInterface;
 import org.jointheleague.iaroc.sensors.UltraSonicSensors;
 
-import java.util.Random;
-
-/**
- * A Lada is an implementation of the IRobotCreateInterface, inspired by Vic's
- * awesome API. It is entirely event driven.
- *
- * @author From the Erik Simplified version 140512A
- */
 public class Brain extends IRobotCreateAdapter {
     private final Dashboard dashboard;
-    Random r = new Random();
     public UltraSonicSensors sonar;
     private boolean firstPass = true;
-    ;
     private int commandAzimuth;
     private int leftSignal;
     private int rightSignal;
@@ -38,8 +33,7 @@ public class Brain extends IRobotCreateAdapter {
     private int rightFrontSignal;
     private int wheelSpeed = 350;
     private int relativeHeading = 0;
-    private int irSensorThreshhold = 300;
-    public int turnSpan;
+    private int cliffSensorThreshold = 300;
     private int[] beep1 = {72, 15};
     private int[] beep2 = {80, 15};
     private int[] beep3 = {65, 15};
@@ -63,10 +57,9 @@ public class Brain extends IRobotCreateAdapter {
         leftSignal = getCliffLeftSignal();
         rightSignal = getCliffRightSignal();
         dashboard.log(String.valueOf(leftFrontSignal));
-//        dashboard.log(leftFrontSignal + "");//for testing only to calibrate threshhold
 
         /***************************************************************************************
-         * Handling IR sensors.
+         * Handling Cliff sensors.
          ***************************************************************************************/
         /***************************************************************************************
          * Checking for bumps. Turns right on left bump. Turns left on
@@ -74,30 +67,26 @@ public class Brain extends IRobotCreateAdapter {
          ***************************************************************************************/
         boolean bumpRightSignal = isBumpRight();
         boolean bumpLeftSignal = isBumpLeft();
-        if (leftFrontSignal > irSensorThreshhold && rightFrontSignal <= irSensorThreshhold) // Seeing left front IR
-        // sensor. Too far right.
+        if (leftFrontSignal > cliffSensorThreshold && rightFrontSignal <= cliffSensorThreshold) // Seeing left front sensor. Too far right.
         {
             song(1, beep1);
             playSong(1);
             driveDirect(wheelSpeed, wheelSpeed / 6); // turn left
-//        } else if (leftSignal > irSensorThreshhold && rightSignal <= irSensorThreshhold) // Seeing left front IR sensor. Too
-//        // far right.
+//        } else if (leftSignal > cliffSensorThreshold && rightSignal <= cliffSensorThreshold) // Seeing left sensor. Way too far right.
 //        {
 //            song(2, beep2);
 //            playSong(2);
 //            driveDirect(wheelSpeed, -wheelSpeed); // spin left
-        } else if (rightFrontSignal > irSensorThreshhold && leftFrontSignal <= irSensorThreshhold) // Seeing right front IR
-        // sensor. Too far left.
+        } else if (rightFrontSignal > cliffSensorThreshold && leftFrontSignal <= cliffSensorThreshold) // Seeing right front sensor. Too far left.
         {
             song(3, beep3);
             playSong(3);
             driveDirect(wheelSpeed / 6, wheelSpeed); // turn right
-//        } else if (rightSignal > irSensorThreshhold && leftSignal <= irSensorThreshhold) // Seeing right front IR sensor.
-//        // Too far left...turn right.
+//        } else if (rightSignal > cliffSensorThreshold && leftSignal <= cliffSensorThreshold) // Seeing right sensor. Way too far left.
 //        {
 //            song(1, beep1);
 //            playSong(1);
-//            driveDirect(0, wheelSpeed); // spin right
+//            driveDirect(-wheelSpeed, wheelSpeed); // spin right
         } else if (bumpLeftSignal && bumpRightSignal) // Front bump.
         {
             song(1, beep1);
